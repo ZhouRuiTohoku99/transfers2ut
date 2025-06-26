@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S2ST Demo - Translation Results</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      padding: 40px 30px;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .abstract {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      color: #555;
+      text-align: justify;
+    }
+    h2 {
+      font-size: 1.75rem;
+      padding: 10px 15px;
+      margin: 40px 0 20px;
+      border-left: 8px solid #ccc;
+      background-color: #f4f6f8;
+      border-radius: 6px;
+      text-align: center;
+    }
+    h2#fr-en { border-left-color: #aed581; background-color: #f1f8e9; }
+    h2#es-en { border-left-color: #4fc3f7; background-color: #e1f5fe; }
+    h2#de-en { border-left-color: #ba68c8; background-color: #f3e5f5; }
+    h2#it-en { border-left-color: #ffb74d; background-color: #fff3e0; }
+    h2#ru-en { border-left-color: #ff8a65; background-color: #fbe9e7; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 30px 0;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    audio {
+      width: 100%;
+    }
+    .image-section {
+      display: flex;
+      justify-content: center;
+      margin: 40px auto;
+    }
+    .image-container {
+      text-align: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .image-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .image-container p {
+      margin-top: 12px;
+      font-size: 1rem;
+      color: #666;
+    }
+    .toc {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .toc a {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: inline-block;
+      margin: 5px;
+      text-decoration: none;
+      color: #333;
+    }
+    .toc a[href="#fr-en"] {
+      background-color: #f1f8e9;
+      border: 1px solid #aed581;
+    }
+    .toc a[href="#es-en"] {
+      background-color: #e1f5fe;
+      border: 1px solid #4fc3f7;
+    }
+    .toc a[href="#de-en"] {
+      background-color: #f3e5f5;
+      border: 1px solid #ba68c8;
+    }
+    .toc a[href="#it-en"] {
+      background-color: #fff3e0;
+      border: 1px solid #ffb74d;
+    }
+    .toc a[href="#ru-en"] {
+      background-color: #fbe9e7;
+      border: 1px solid #ff8a65;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Improving Speech-to-Speech Translation for<br>Low-Resource Languages via Transfer Learning</h1>
+    <p class="abstract">
+      End-to-end Speech-to-Speech Translation (S2ST) enables direct transformation from source speech in one language to target speech in another. Still, it typically requires large-scale parallel data, which is unavailable for many low-resource languages. In this work, we investigate transfer learning strategies to improve S2ST performance in low-resource settings. Our approach involves pretraining a multitask S2ST model on high-resource language pairs (e.g., French-English, German-English, Spanish-English) and transferring parameters to models for low-resource pairs such as Italian-English.
+      We evaluate multiple transfer configurations, including full S2UT transfer, auxiliary ASR module sharing, and partial encoder/decoder reuse. Experimental results demonstrate that transfer from French-English consistently yields the most significant gains, owing to its larger data volume. BLEU scores improve from 10.41 to 13.77 (ES-EN), 9.70 to 12.15 (DE-EN), and more notably from 2.89 to 10.01 and 2.10 to 9.10 for the low-resource IT-EN and RU-EN pairs. Ablation studies show that encoder transfer contributes more to performance than decoder transfer, and that auxiliary ASR modules provide limited benefits.
+      These findings suggest that carefully designed structural transfer, particularly of the encoder, is crucial for effective low-resource S2ST.
+    </p>
+
+    <div class="image-section">
+      <div class="image-container">
+        <img src="figure/structure.png" alt="Transfer Learning Architecture">
+        <p>Figure 1. Architecture of our transfer learning approach for end-to-end speech-to-speech translation. The upper part shows the multi-task pretraining on high-resource language pairs, and the lower part shows fine-tuning on low-resource language pairs.</p>
+      </div>
+    </div>
+
+    <h2 style="text-align:center; font-size: 1.5rem; margin-bottom: 10px;">🔗 Quick Navigation</h2>
+   <div class="toc" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px;">
+      <div style="padding: 10px 20px; border-radius: 8px; font-weight: bold; background-color: #eeeeee; border: 1px solid #cccccc; display: inline-block; white-space: nowrap;">Result of Different Language: </div>
+      <a href="#fr-en">🇫🇷 Fr-En</a>
+      <a href="#es-en">🇪🇸 Es-En</a>
+      <a href="#de-en">🇩🇪 De-En</a>
+      <a href="#it-en">🇮🇹 It-En</a>
+      <a href="#ru-en">🇷🇺 Ru-En</a>
+    </div>
+
+
+    <!-- Language Sections -->
+    <h2 id="fr-en">Fr-En Translation Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Sample</th>
+          <th colspan="2">Ground Truth</th>
+          <th colspan="4">Translation</th>
+        </tr>
+        <tr>
+          <th>Source (French)</th>
+          <th>Target (English)</th>
+          <th>S2UT</th>
+          <th>S2UT + ES_Pretrain</th>
+          <th>S2UT + DE_Pretrain</th>
+          <th>S2UT + FR_Pretrain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sample1</td>
+          <td><audio controls><source src="waveform/fr-en/sample1/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample1/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample1/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample1/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample1/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Certaines de mes interrogations sont semblables aux vôtres.</td>
+          <td>some of my questions are similar to yours</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>some of my questions are similar to you</td>
+          <td>some of my questions are similar to yours</td>
+          <td>some of my interrogations are similar to yours</td>
+          <td> </td>
+        </tr>
+
+        <tr>
+          <td>Sample2</td>
+          <td><audio controls><source src="waveform/fr-en/sample2/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample2/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample2/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample2/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample2/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Je mets aux voix l’amendement numéro un.</td>
+          <td>i will now put to the vote amendment number one</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>i'm putting amendment number one</td>
+          <td>i am putting to the vote amendment number one</td>
+          <td>i'm putting amendment number one</td>
+          <td></td>
+          
+        </tr>
+
+        <tr>
+          <td>Sample3</td>
+          <td><audio controls><source src="waveform/fr-en/sample3/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample3/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample3/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample3/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/fr-en/sample3/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Je citerai, d’abord, l’investissement productif et la croissance durable</td>
+          <td>i will first quote the productive investment and the sustainable growth</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>i would first make the productive investment in the english girof</td>
+          <td>i'll first investigate the productive investment in real growth</td>
+          <td>i will first investment productive in growth</td>
+          <td></td>
+          
+        </tr>
+
+      </tbody>
+    </table>
+
+    <h2 id="es-en">Es-En Translation Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Sample</th>
+          <th colspan="2">Ground Truth</th>
+          <th colspan="4">Translation</th>
+        </tr>
+        <tr>
+          <th>Source (Spanish)</th>
+          <th>Target (English)</th>
+          <th>S2UT</th>
+          <th>S2UT + ES_Pretrain</th>
+          <th>S2UT + DE_Pretrain</th>
+          <th>S2UT + FR_Pretrain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sample1</td>
+          <td><audio controls><source src="waveform/es-en/sample1/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample1/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample1/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          <td><audio controls><source src="waveform/es-en/sample1/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample1/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>te veo muy arreglada . ¿ has quedado con alguien ?</td>
+          <td>i see you very well dressed are you going to see anyone</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>you've looked very dressed up do you can see with some one</td>
+          <td> </td>
+          <td>do you look fairy dressed up do you have date with some one</td>
+          <td>you look fairy dressed up do you have a date with some one</td>
+          
+        </tr>
+
+        <tr>
+          <td>Sample2</td>
+          <td><audio controls><source src="waveform/es-en/sample2/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample2/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample2/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          <td><audio controls><source src="waveform/es-en/sample2/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample2/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>a ver , Palomares , yo creo que lo de ser cura no es</td>
+          <td>let's see palomares i think that being a priest it's not</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>let's see i seen my marrows i think its priest is not</td>
+          <td></td>
+          <td>let's see palamars i think it is not priesting</td>
+          <td>let's see palamars i think that the priest it's not</td>
+          
+          
+        </tr>
+
+        <tr>
+          <td>Sample3</td>
+          <td><audio controls><source src="waveform/es-en/sample3/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample3/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample3/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          <td><audio controls><source src="waveform/es-en/sample3/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/es-en/sample3/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>A ese grupo de amigos les gusta comer helados por la tarde</td>
+          <td>that group of friends likes to eat ice creams in the afternoon</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>it is the group friend's luck eventually in the afternoon</td>
+          <td></td>
+          <td>their group of friends it is liked to venerate for the afternoon</td>
+          <td>that group of friends likes to eat ice creams in the afternoon</td>
+          
+          
+        </tr>
+
+      </tbody>
+    </table>
+
+    <h2 id="de-en">De-En Translation Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Sample</th>
+          <th colspan="2">Ground Truth</th>
+          <th colspan="4">Translation</th>
+        </tr>
+        <tr>
+          <th>Source (German)</th>
+          <th>Target (English)</th>
+          <th>S2UT</th>
+          <th>S2UT + ES_Pretrain</th>
+          <th>S2UT + DE_Pretrain</th>
+          <th>S2UT + FR_Pretrain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sample1</td>
+          <td><audio controls><source src="waveform/de-en/sample1/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample1/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample1/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample1/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          <td><audio controls><source src="waveform/de-en/sample1/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>An der Wand hängen Porträts aller ehemaligen Bonzen des Hauses.</td>
+          <td>on the wall hang portraits of all the former rich people of the house</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>election portraits of all the former bonds of the house</td>
+          <td>on the constituency portraits all the former ponds of the house</td>
+          <td> </td>
+          <td>on the wall of the portraits all former bonds of the house</td>
+          
+        </tr>
+
+        <tr>
+          <td>Sample2</td>
+          <td><audio controls><source src="waveform/de-en/sample2/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample2/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample2/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample2/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          <td><audio controls><source src="waveform/de-en/sample2/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Valerie wohnt in einem alten Plattenbau aus DDR-Zeiten.</td>
+          <td>valerie lives in an old apartment block from g d r times</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>quality lives in the old record living building on the old play trees</td>
+          <td>volity lives lived in the old record from the old building</td>
+          <td></td>
+          <td>vality lives in the old record cultivation from the old time </td>
+          
+          
+        </tr>
+
+        <tr>
+          <td>Sample3</td>
+          <td><audio controls><source src="waveform/de-en/sample3/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample3/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample3/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/de-en/sample3/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td> </td>
+          <td><audio controls><source src="waveform/de-en/sample3/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Jörg studiert irgendwas mit Medien</td>
+          <td>jorg studies something with media</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>new york studied with medium</td>
+          <td>york studied some one with medium</td>
+          <td></td>
+          <td>yorg studied something with media</td>
+          
+          
+        </tr>
+
+      </tbody>
+    </table>
+
+    <h2 id="it-en">It-En Translation Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Sample</th>
+          <th colspan="2">Ground Truth</th>
+          <th colspan="4">Translation</th>
+        </tr>
+        <tr>
+          <th>Source (Italian)</th>
+          <th>Target (English)</th>
+          <th>S2UT</th>
+          <th>S2UT + ES_Pretrain</th>
+          <th>S2UT + DE_Pretrain</th>
+          <th>S2UT + FR_Pretrain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sample1</td>
+          <td><audio controls><source src="waveform/it-en/sample1/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample1/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample1/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample1/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample1/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample1/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Queste competenze risultano indispensabili per l'attivit`a  di educatore che operi nell'ambito di un sistema formativo.</td>
+          <td>these competencies are indispensable for the educator activities who operates in the education system</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>suspension resigns and individual partic abilities that required of every difficulty in orderable</td>
+          <td>competency results in results of the devocating editory of the education of evidence system</td>
+          <td>these competence is result inexpensable developators that it involved in a formatic system</td>
+          <td>these competence inespensible to expensivels partly activities that offers the individual system of the information</td>
+          
+        </tr>
+
+        <tr>
+          <td>Sample2</td>
+          <td><audio controls><source src="waveform/it-en/sample2/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample2/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample2/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample2/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample2/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/it-en/sample2/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Un altro evento che viene narrato riguarda il vecchio asino grigio</td>
+          <td>another event being told concerns the old grey donkey</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>or open and vasso in invilliboro royal then a feast at his coffin</td>
+          <td>another event that has interrogated in a single grid</td>
+          <td>another dress that he could have kept in other beats has a brief lower</td>
+          <td>another event is in order to the great competition that grey</td>
+          
+          
+        </tr>
+
+      </tbody>
+    </table>
+
+    <h2 id="ru-en">Ru-En Translation Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Sample</th>
+          <th colspan="2">Ground Truth</th>
+          <th colspan="4">Translation</th>
+        </tr>
+        <tr>
+          <th>Source (Russian)</th>
+          <th>Target (English)</th>
+          <th>S2UT</th>
+          <th>S2UT + ES_Pretrain</th>
+          <th>S2UT + DE_Pretrain</th>
+          <th>S2UT + FR_Pretrain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sample1</td>
+          <td><audio controls><source src="waveform/ru-en/sample1/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample1/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample1/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample1/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample1/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample1/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Я предоставляю слово представителю Армении для выступления по порядку ведения заседания.</td>
+          <td>i give the floor to the representative of armenia to speak on a point of order</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>i will keep on following this principle in position of the conference unders armament in non proliferation regime</td>
+          <td>i give the floor to the representative of armenia to speak on a meeting of the meeting</td>
+          <td>i give the floor to the representative of our joining for its seeking</td>
+          <td>i give the floor to the representative of anne meteor for speaking about the authorized meeting</td>
+          
+        </tr>
+
+        <tr>
+          <td>Sample2</td>
+          <td><audio controls><source src="waveform/ru-en/sample2/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample2/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample2/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample2/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample2/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample2/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Теперь я предоставляю слово представителю Бангладеш.</td>
+          <td>i am giving floor now to the representative of bangladesh</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>now i turned to the list of speakers for to day</td>
+          <td>now i turned to the representative of bengledesh</td>
+          <td>now i give the floor to the representative of whole of bengalish</td>
+          <td>i'm now give the floor to the representative of bengladash</td>
+          
+          
+        </tr>
+
+        <tr>
+          <td>Sample3</td>
+          <td><audio controls><source src="waveform/ru-en/sample3/src.mp3" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample3/ref.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample3/s2ut.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample3/es_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample3/de_pretrain.wav" type="audio/mpeg"></audio></td>
+          <td><audio controls><source src="waveform/ru-en/sample3/fr_pretrain.wav" type="audio/mpeg"></audio></td>
+          
+        </tr>
+        <tr>
+          <td>Reference</td>
+          <td>Мы твердо убеждены, что самой крупной угрозой безопасности всех стран является существование ядерного оружия.</td>
+          <td>we firmly believe that the biggest threat to the safety of all countries is the nuclear weapon</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>ASR</td>
+          <td></td>
+          <td></td>
+          <td>we are convince that such agreements will be destructive president of the provisions of the secretary general</td>
+          <td>we are firmly believed that the benefit security and security are all satisfaction in nuclear weapons</td>
+          <td>we firmly believe that the most trafficking threats of security is nuclear weapon</td>
+          <td>we firmly believe that the thread of the security threat is attestified for nuclear weapons</td>
+          
+          
+        </tr>
+
+      </tbody>
+    </table>
+
+
+
+
+
+  </div>
+</body>
+</html>
